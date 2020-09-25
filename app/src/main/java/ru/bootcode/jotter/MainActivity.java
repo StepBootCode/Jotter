@@ -21,6 +21,10 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 
+import ru.bootcode.jotter.daggemodule.AppComponent;
+import ru.bootcode.jotter.daggemodule.AppModule;
+import ru.bootcode.jotter.daggemodule.DatabaseModule;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,6 +49,15 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+
+
+/*
+        DaggerAppComponent.builder()
+                .appModule(new AppModule(getApplication()))
+                .roomModule(new DatabaseModule(getApplication()))
+                .build()
+                .inject(this);
+                */
     }
 
     @Override
