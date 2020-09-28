@@ -1,5 +1,7 @@
 package ru.bootcode.jotter;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,10 +25,13 @@ import android.view.Menu;
 
 import ru.bootcode.jotter.daggemodule.AppComponent;
 import ru.bootcode.jotter.daggemodule.AppModule;
+import ru.bootcode.jotter.daggemodule.DaggerAppComponent;
 import ru.bootcode.jotter.daggemodule.DatabaseModule;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    static final int EDIT_NOTE_REQUEST = 2;               // Код обратки редактора записи Notes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,12 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+                intent.putExtra("id",       0);
+                startActivityForResult(intent,EDIT_NOTE_REQUEST);
+
+
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -51,13 +62,12 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-/*
         DaggerAppComponent.builder()
                 .appModule(new AppModule(getApplication()))
-                .roomModule(new DatabaseModule(getApplication()))
+                .databaseModule(new DatabaseModule(getApplication()))
                 .build()
                 .inject(this);
-                */
+              /*  */
     }
 
     @Override
@@ -115,5 +125,16 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_NOTE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+            }
+        }
+
     }
 }
