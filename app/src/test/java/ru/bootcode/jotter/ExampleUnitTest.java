@@ -1,3 +1,12 @@
+/*
+ *
+ *  Created by Sergey Stepchenkov on 02.10.20 17:10
+ *  Copyright (c) 2020. All rights reserved.
+ *  More info on www.bootcode.ru
+ *  Last modified 02.10.20 17:10
+ *
+ */
+
 package ru.bootcode.jotter;
 
 import org.junit.Test;

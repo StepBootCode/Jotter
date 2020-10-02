@@ -1,3 +1,12 @@
+<!--
+  ~ /*
+  ~  Created by Sergey Stepchenkov on 02.10.20 17:10
+  ~  Copyright (c) 2020. All rights reserved.
+  ~  More info on www.bootcode.ru
+  ~  Last modified 02.10.20 17:10
+  ~  */
+  -->
+
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
