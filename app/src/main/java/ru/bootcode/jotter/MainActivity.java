@@ -9,12 +9,11 @@
 
 package ru.bootcode.jotter;
 
-import android.content.ContentValues;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.view.View;
 
@@ -29,16 +28,29 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import ru.bootcode.jotter.daggemodule.AppComponent;
 import ru.bootcode.jotter.daggemodule.AppModule;
 import ru.bootcode.jotter.daggemodule.DaggerAppComponent;
 import ru.bootcode.jotter.daggemodule.DatabaseModule;
+import ru.bootcode.jotter.database.ListNotesAdapter;
+import ru.bootcode.jotter.database.Note;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    @Inject
+    AppComponent mAppComponent;
 
     static final int EDIT_NOTE_REQUEST = 2;               // Код обратки редактора записи Notes
 
@@ -47,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        final RecyclerView rvMain = findViewById(R.id.rvMain);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +89,16 @@ public class MainActivity extends AppCompatActivity
                 .databaseModule(new DatabaseModule(getApplication()))
                 .build()
                 .inject(this);
-              /*  */
+
+        mAppComponent.jotterDatabase().notesDao().getAll()
+                .observeOn(Schedulers.newThread())
+                .subscribe(new Consumer<List<Note>>() {
+                    @Override
+                    public void accept(List<Note> notes) throws Exception {
+                        ListNotesAdapter adapter=new ListNotesAdapter(notes);
+                        rvMain.setAdapter(adapter);
+                    }
+                }).dispose();
     }
 
     @Override
