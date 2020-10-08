@@ -28,6 +28,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
@@ -36,12 +37,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import ru.bootcode.jotter.daggemodule.AppComponent;
 import ru.bootcode.jotter.daggemodule.AppModule;
 import ru.bootcode.jotter.daggemodule.DaggerAppComponent;
 import ru.bootcode.jotter.daggemodule.DatabaseModule;
+import ru.bootcode.jotter.database.JotterDatabase;
 import ru.bootcode.jotter.database.ListNotesAdapter;
 import ru.bootcode.jotter.database.Note;
 
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @Inject
-    AppComponent mAppComponent;
+    JotterDatabase jdb;
 
     static final int EDIT_NOTE_REQUEST = 2;               // Код обратки редактора записи Notes
 
@@ -60,6 +63,10 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         final RecyclerView rvMain = findViewById(R.id.rvMain);
+
+        RecyclerView.LayoutManager couponLayoutManager = new LinearLayoutManager(this);
+        rvMain.setLayoutManager(couponLayoutManager);
+
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -83,15 +90,10 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+        ((App) getApplication()).mAppComponent.inject(this);
 
-        DaggerAppComponent.builder()
-                .appModule(new AppModule(getApplication()))
-                .databaseModule(new DatabaseModule(getApplication()))
-                .build()
-                .inject(this);
-
-        mAppComponent.jotterDatabase().notesDao().getAll()
-                .observeOn(Schedulers.newThread())
+        jdb.notesDao().getAll()
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<Note>>() {
                     @Override
                     public void accept(List<Note> notes) throws Exception {
