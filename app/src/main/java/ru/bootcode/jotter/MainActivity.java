@@ -37,7 +37,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import ru.bootcode.jotter.daggemodule.AppComponent;
@@ -72,14 +74,10 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
                 intent.putExtra("id",       0);
                 startActivityForResult(intent,EDIT_NOTE_REQUEST);
 
-
-             //   Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-             //           .setAction("Action", null).show();
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -92,15 +90,26 @@ public class MainActivity extends AppCompatActivity
 
         ((App) getApplication()).mAppComponent.inject(this);
 
-        jdb.notesDao().getAll()
+        Disposable d = jdb.notesDao().getAll()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<Note>>() {
                     @Override
                     public void accept(List<Note> notes) throws Exception {
-                        ListNotesAdapter adapter=new ListNotesAdapter(notes);
+                        ListNotesAdapter adapter = new ListNotesAdapter(notes);
                         rvMain.setAdapter(adapter);
                     }
-                }).dispose();
+                });
+
+        rvMain.addOnItemTouchListener( // and the click is handled
+                new RecyclerClickListener(this, new RecyclerClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        // The click on the item must be handled
+                        Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+                        intent.putExtra("id",       position);
+                        startActivityForResult(intent,EDIT_NOTE_REQUEST);
+                    }
+                }));
+
     }
 
     @Override
