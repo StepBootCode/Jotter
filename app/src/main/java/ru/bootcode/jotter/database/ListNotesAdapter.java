@@ -44,9 +44,10 @@ public class ListNotesAdapter  extends RecyclerView.Adapter<ListNotesAdapter.Vie
 
        // viewHolder.tvName.setText(md.getName());
         viewHolder.tvNote.setText(md.getNote());
-        viewHolder.tvNote.setBackgroundColor(md.getColor());
-        GradientDrawable bgShape = (GradientDrawable) viewHolder.vwCircle.getBackground();
-        bgShape.setColor(Color.parseColor("#ffbb33"));
+       // viewHolder.tvNote.setBackgroundColor(md.getColor());
+        viewHolder.itemView.setBackgroundColor(md.getColor());
+      //  GradientDrawable bgShape = (GradientDrawable) viewHolder.vwCircle.getBackground();
+      //  bgShape.setColor(Color.parseColor("#ffbb33"));
 
     }
 
@@ -63,7 +64,7 @@ public class ListNotesAdapter  extends RecyclerView.Adapter<ListNotesAdapter.Vie
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNote=(TextView)itemView.findViewById(R.id.tvNote);
-            vwCircle = itemView.findViewById(R.id.vwCircle);
+      //      vwCircle = itemView.findViewById(R.id.vwCircle);
         }
     }
 }

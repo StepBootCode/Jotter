@@ -13,5 +13,6 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#008577</color>
     <color name="colorTransparent">#00000000</color>
+    <color name="skyBlue">#FFE1B5</color>
 
 </resources>

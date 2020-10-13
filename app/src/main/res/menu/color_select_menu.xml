@@ -11,29 +11,31 @@
 
     <group android:id="@+id/menugroup1" >
         <item
-            android:id="@+id/menu1"
-            android:icon="@android:color/holo_orange_light"
+            android:id="@+id/menuYellow"
             android:title="Yellow" />
+
         <item
-            android:id="@+id/menu2"
-            android:title="Green"/>
+            android:id="@+id/menuGreen"
+            android:checkable="false"
+            android:title="Green" />
         <item
-            android:id="@+id/menu3"
-            android:title="Blue"/>
+            android:id="@+id/menuBlue"
+            android:checkable="false"
+            android:title="Blue" />
         <item
-            android:id="@+id/menu4"
+            android:id="@+id/menuGray"
             android:title="Gray"/>
         <item
-            android:id="@+id/menu5"
-            android:title="Gold"/>
+            android:id="@+id/menuOrange"
+            android:title="Orange" />
         <item
-            android:id="@+id/menu6"
-            android:title="Red"/>
+            android:id="@+id/menuWhite"
+            android:title="White" />
 
     </group>
     <group android:id="@+id/menugroup2" >
         <item
-            android:id="@+id/menu7"
+            android:id="@+id/menuSelect"
             android:title="Select color"/>
     </group>
 

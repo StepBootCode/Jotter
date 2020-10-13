@@ -11,13 +11,15 @@ package ru.bootcode.jotter;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.format.DateUtils;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,8 +27,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -85,6 +85,7 @@ public class EditNoteActivity extends AppCompatActivity {
             case android.R.id.home:
                 if (!teNote.getText().toString().trim().isEmpty()) {
                     Note note = new Note("", dateTo, teNote.getText().toString(), img_id, type_id, check, crypto, dateTo);
+                    note.setColor(noteColor);
                     jdb.notesDao().insert(note);
                     Intent answerIntent = new Intent();
                     answerIntent.putExtra(INTENT_RESULT, note.getId());
@@ -130,14 +131,14 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     public void setColor(View v) {
-        showPopupMenu(v);
+        showPopupMenuColor(v);
     }
 
     public void openPopupMenu(View v) {
 
     }
 
-    private void showPopupMenu(View v) {
+    private void showPopupMenuColor(View v) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.inflate(R.menu.color_select_menu);
 
@@ -146,22 +147,40 @@ public class EditNoteActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
-                            case R.id.menu1:
-                                noteColor = Color.RED;
+                            case R.id.menuYellow:
+                                noteColor = Color.parseColor("#FFF5C3");
                                 teNote.setBackgroundColor(noteColor);
-                                Toast.makeText(getApplicationContext(),
-                                        "Вы выбрали  1",
-                                        Toast.LENGTH_SHORT).show();
+
                                 return true;
-                            case R.id.menu2:
-                                Toast.makeText(getApplicationContext(),
-                                        "Вы выбрали  2",
-                                        Toast.LENGTH_SHORT).show();
+                            case R.id.menuGreen:
+                                noteColor = Color.parseColor("#C9FFC9");
+                                teNote.setBackgroundColor(noteColor);
+
                                 return true;
-                            case R.id.menu3:
-                                Toast.makeText(getApplicationContext(),
-                                        "Вы выбрали  3",
-                                        Toast.LENGTH_SHORT).show();
+                            case R.id.menuBlue:
+                                noteColor = Color.parseColor("#C8FFFF");
+                                teNote.setBackgroundColor(noteColor);
+
+                                return true;
+                            case R.id.menuGray:
+                                noteColor = Color.parseColor("#DFDFDF");
+                                teNote.setBackgroundColor(noteColor);
+
+                                return true;
+                            case R.id.menuOrange:
+                                noteColor = Color.parseColor("#FFE1B5");
+                                teNote.setBackgroundColor(noteColor);
+
+                                return true;
+                            case R.id.menuWhite:
+                                noteColor = Color.parseColor("#FFFFFF");
+                                teNote.setBackgroundColor(noteColor);
+
+                                return true;
+                            case R.id.menuSelect:
+                                noteColor = Color.parseColor("#FFFFFF");
+                                teNote.setBackgroundColor(noteColor);
+
                                 return true;
                             default:
                                 return false;
