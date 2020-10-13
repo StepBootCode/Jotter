@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  Created by Sergey Stepchenkov on 12.10.20 17:15
+  ~  Copyright (c) 2020. All rights reserved.
+  ~  More info on www.bootcode.ru
+  ~  Last modified 12.10.20 17:15
+  ~  */
+  -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <group android:id="@+id/menugroup1" >
+        <item
+            android:id="@+id/menu1"
+            android:icon="@android:color/holo_orange_light"
+            android:title="Yellow" />
+        <item
+            android:id="@+id/menu2"
+            android:title="Green"/>
+        <item
+            android:id="@+id/menu3"
+            android:title="Blue"/>
+        <item
+            android:id="@+id/menu4"
+            android:title="Gray"/>
+        <item
+            android:id="@+id/menu5"
+            android:title="Gold"/>
+        <item
+            android:id="@+id/menu6"
+            android:title="Red"/>
+
+    </group>
+    <group android:id="@+id/menugroup2" >
+        <item
+            android:id="@+id/menu7"
+            android:title="Select color"/>
+    </group>
+
+</menu>

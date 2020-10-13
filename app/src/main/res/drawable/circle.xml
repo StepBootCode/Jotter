@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  Created by Sergey Stepchenkov on 09.10.20 17:27
+  ~  Copyright (c) 2020. All rights reserved.
+  ~  More info on www.bootcode.ru
+  ~  Last modified 09.10.20 17:27
+  ~  */
+  -->
+
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid
+        android:color="#000"/>
+    <size
+        android:width="32dp"
+        android:height="32dp"/>
+</shape>

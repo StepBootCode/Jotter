@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~  Created by Sergey Stepchenkov on 02.10.20 17:10
+  ~  Copyright (c) 2020. All rights reserved.
+  ~  More info on www.bootcode.ru
+  ~  Last modified 02.10.20 17:10
+  ~  */
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="82dp"
+android:padding="@dimen/activity_horizontal_margin"
+android:background="?android:selectableItemBackground"
+android:clickable="true"
+android:focusable="true"
+android:orientation="vertical" >
+
+<View
+    android:id="@+id/vwCircle"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/circle"
+    android:layout_centerVertical="true"
+    android:layout_alignParentLeft="true"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_toRightOf="@+id/vwCircle"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvNote"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="+01 123456789"
+            android:textColor="#9f9f9f"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>
