@@ -32,6 +32,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
+import android.widget.AdapterView;
+import android.widget.RelativeLayout;
 
 import java.util.List;
 
@@ -52,7 +54,7 @@ import ru.bootcode.jotter.database.Note;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener{
 
     @Inject
     JotterDatabase jdb;
@@ -75,7 +77,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-                intent.putExtra("id",       0);
+                intent.putExtra("id",       "");
                 startActivityForResult(intent,EDIT_NOTE_REQUEST);
 
             }
@@ -103,13 +105,12 @@ public class MainActivity extends AppCompatActivity
         rvMain.addOnItemTouchListener( // and the click is handled
                 new RecyclerClickListener(this, new RecyclerClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
-                        // The click on the item must be handled
+                        Note nt = ((ListNotesAdapter)rvMain.getAdapter()).getItemNote(position);
                         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-                        intent.putExtra("id",       position);
+                        intent.putExtra("id",  nt.getId());
                         startActivityForResult(intent,EDIT_NOTE_REQUEST);
                     }
                 }));
-
     }
 
     @Override
@@ -169,7 +170,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -179,4 +179,6 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
+
 }

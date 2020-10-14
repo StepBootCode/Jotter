@@ -25,14 +25,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import ru.bootcode.jotter.database.JotterDatabase;
+import ru.bootcode.jotter.database.ListNotesAdapter;
 import ru.bootcode.jotter.database.Note;
 
 import static java.util.Calendar.*;
@@ -42,54 +49,68 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Inject
     JotterDatabase jdb;
+    String sID;
+    Note tempNote;
 
-    int noteColor = Color.WHITE;
-    int img_id = 0;
-    int type_id = 0;
-    boolean check = false;
-    boolean crypto = false;
-    Date dateTo = new Date();
+    ImageButton imgbtnLock;
     EditText teNote;
-    TextView tvDate;
-    Button btDate;
     Calendar dateAndTime;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
 
+        Intent intent = getIntent();
+        sID  = intent.getStringExtra("id");// Если пусто то новый, иначе это редактирование
+
         ActionBar actionBar =getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        dateAndTime= getInstance();
 
         ((App) getApplication()).mAppComponent.inject(this);
 
-
-
         teNote = findViewById(R.id.teNote);
+        imgbtnLock= findViewById(R.id.imgbtnLock);
 
-        dateAndTime= getInstance();
-
-        setInitialDateTime();
-
+        if (!sID.isEmpty()) {
+            Disposable d = jdb.notesDao().getById(sID)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Note>() {
+                        @Override
+                        public void accept(Note note) throws Exception {
+                            tempNote = note;
+                            teNote.setText(note.getNote());
+                            if (tempNote.isCrypto()) {
+                                imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
+                            }
+                        }
+                    });
+        } else {
+            tempNote = new Note("", new Date(), "", 1, 1, false, false, new Date());
+            tempNote.setColor(Color.WHITE);
+            setInitialDateTime();
+        }
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (!teNote.getText().toString().trim().isEmpty()) {
-                    Note note = new Note("", dateTo, teNote.getText().toString(), img_id, type_id, check, crypto, dateTo);
-                    note.setColor(noteColor);
-                    jdb.notesDao().insert(note);
-                    Intent answerIntent = new Intent();
-                    answerIntent.putExtra(INTENT_RESULT, note.getId());
-                    setResult(RESULT_OK, answerIntent);
+                if (!(tempNote == null)) {
+                    if (!teNote.getText().toString().trim().isEmpty()) {
+                        if (!sID.isEmpty()) {
+                            jdb.notesDao().insert(tempNote);
+                        }else{
+                            jdb.notesDao().update(tempNote);
+                        }
+                        Intent answerIntent = new Intent();
+                        answerIntent.putExtra(INTENT_RESULT, tempNote.getId());
+                        setResult(RESULT_OK, answerIntent);
+                    }
                 }
                 this.finish();
                 return true;
@@ -127,6 +148,15 @@ public class EditNoteActivity extends AppCompatActivity {
     };
 
     public void setPassword(View v) {
+        if (tempNote.isCrypto()) {
+            tempNote.setCrypto(false);
+            imgbtnLock.setImageResource(R.drawable.ic_act_lock);
+        } else {
+            tempNote.setCrypto(true);
+            imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
+        }
+        Toast.makeText(getApplicationContext(), "onDismiss",
+                Toast.LENGTH_SHORT).show();
 
     }
 
@@ -148,38 +178,38 @@ public class EditNoteActivity extends AppCompatActivity {
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.menuYellow:
-                                noteColor = Color.parseColor("#FFF5C3");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#FFF5C3"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuGreen:
-                                noteColor = Color.parseColor("#C9FFC9");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#C9FFC9"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuBlue:
-                                noteColor = Color.parseColor("#C8FFFF");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#C8FFFF"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuGray:
-                                noteColor = Color.parseColor("#DFDFDF");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#DFDFDF"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuOrange:
-                                noteColor = Color.parseColor("#FFE1B5");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#FFE1B5"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuWhite:
-                                noteColor = Color.parseColor("#FFFFFF");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#FFFFFF"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             case R.id.menuSelect:
-                                noteColor = Color.parseColor("#FFFFFF");
-                                teNote.setBackgroundColor(noteColor);
+                                tempNote.setColor(Color.parseColor("#FFFFFF"));
+                                teNote.setBackgroundColor(tempNote.getColor());
 
                                 return true;
                             default:

@@ -14,6 +14,9 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,7 +24,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import io.reactivex.functions.Consumer;
 import ru.bootcode.jotter.R;
+
 
 public class ListNotesAdapter  extends RecyclerView.Adapter<ListNotesAdapter.ViewHolder>{
     private List<Note> notesLists;
@@ -46,8 +51,26 @@ public class ListNotesAdapter  extends RecyclerView.Adapter<ListNotesAdapter.Vie
         viewHolder.tvNote.setText(md.getNote());
        // viewHolder.tvNote.setBackgroundColor(md.getColor());
         viewHolder.itemView.setBackgroundColor(md.getColor());
-      //  GradientDrawable bgShape = (GradientDrawable) viewHolder.vwCircle.getBackground();
-      //  bgShape.setColor(Color.parseColor("#ffbb33"));
+
+        if (md.isCrypto()) {
+            viewHolder.vwPic.setImageResource(R.drawable.ic_act_lock);
+        } else {
+            switch (md.getType_id()) {
+                case 1: {
+                    viewHolder.vwPic.setImageResource(R.drawable.ic_act_calendar);
+                    break;
+                }
+                case 2: {
+                    viewHolder.vwPic.setImageResource(R.drawable.ic_act_lock);
+                    break;
+                }
+                default:{
+                    viewHolder.vwPic.setImageResource(R.color.colorTransparent);
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(0, 48);
+                    viewHolder.vwPic.setLayoutParams(layoutParams);
+                }
+            }
+        }
 
     }
 
@@ -56,15 +79,22 @@ public class ListNotesAdapter  extends RecyclerView.Adapter<ListNotesAdapter.Vie
         return notesLists.size();
     }
 
+    public Note getItemNote(int i) {
+        return notesLists.get(i);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder{
        // private TextView tvName;
         private TextView tvNote;
-        private View vwCircle;
+        private ImageView vwPic;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNote=(TextView)itemView.findViewById(R.id.tvNote);
-      //      vwCircle = itemView.findViewById(R.id.vwCircle);
+            vwPic = (ImageView) itemView.findViewById(R.id.vwPic);
         }
+
     }
+
+
 }

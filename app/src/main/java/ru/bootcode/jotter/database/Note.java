@@ -91,6 +91,41 @@ public class Note {
         return (this.id.equals(tmp.id) && this.name.equals(tmp.name) && this.note.equals(tmp.note));
     }
 
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public void setImg_id(int img_id) {
+        this.img_id = img_id;
+    }
+
+    public void setType_id(int type_id) {
+        this.type_id = type_id;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    public void setCrypto(boolean crypto) {
+        this.crypto = crypto;
+    }
+
+    public void setTodate(Date todate) {
+        this.todate = todate;
+    }
     public String getId() {
         return id;
     }
