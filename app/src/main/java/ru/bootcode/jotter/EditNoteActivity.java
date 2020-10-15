@@ -16,9 +16,11 @@ import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,8 +29,10 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +59,7 @@ public class EditNoteActivity extends AppCompatActivity {
     ImageButton imgbtnLock;
     EditText teNote;
     Calendar dateAndTime;
+    Date dateTo = new Date();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,13 +89,14 @@ public class EditNoteActivity extends AppCompatActivity {
                         public void accept(Note note) throws Exception {
                             tempNote = note;
                             teNote.setText(note.getNote());
+                            dateTo.setTime(note.getTodate().getTime());
                             if (tempNote.isCrypto()) {
                                 imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
                             }
                         }
                     });
         } else {
-            tempNote = new Note("", new Date(), "", 1, 1, false, false, new Date());
+            tempNote = new Note("", new Date(), "", 1, 1, false, false, dateTo);
             tempNote.setColor(Color.WHITE);
             setInitialDateTime();
         }
@@ -121,11 +127,12 @@ public class EditNoteActivity extends AppCompatActivity {
 
     // установка начальных даты и времени
     private void setInitialDateTime() {
-        //dateTo.setTime(dateAndTime.getTimeInMillis());
-        //tvDate.setText(DateUtils.formatDateTime(EditNoteActivity.this,
-        //        dateAndTime.getTimeInMillis(),
-         //       DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR
-         //               | DateUtils.FORMAT_SHOW_TIME));
+        dateTo.setTime(dateAndTime.getTimeInMillis());
+        Toast.makeText(getApplicationContext(),
+                DateUtils.formatDateTime(EditNoteActivity.this,
+                       dateAndTime.getTimeInMillis(),
+                       DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME),
+                Toast.LENGTH_SHORT).show();
     }
 
     // отображаем диалоговое окно для выбора даты
@@ -137,12 +144,32 @@ public class EditNoteActivity extends AppCompatActivity {
                 .show();
     }
 
+    // отображаем диалоговое окно для выбора даты
+    public void setTime() {
+        new TimePickerDialog(this, t,
+                dateAndTime.get(HOUR),
+                dateAndTime.get(MINUTE),
+                true)
+                .show();
+    }
+
     // установка обработчика выбора даты
     DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             dateAndTime.set(YEAR, year);
             dateAndTime.set(MONTH, monthOfYear);
             dateAndTime.set(DAY_OF_MONTH, dayOfMonth);
+            //setInitialDateTime();
+            setTime();
+        }
+    };
+
+    // установка обработчика выбора даты
+    TimePickerDialog.OnTimeSetListener t = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            dateAndTime.set(HOUR, i);
+            dateAndTime.set(MINUTE, i1);
             setInitialDateTime();
         }
     };
@@ -151,13 +178,14 @@ public class EditNoteActivity extends AppCompatActivity {
         if (tempNote.isCrypto()) {
             tempNote.setCrypto(false);
             imgbtnLock.setImageResource(R.drawable.ic_act_lock);
+            Toast.makeText(getApplicationContext(), "unlock",
+                    Toast.LENGTH_SHORT).show();
         } else {
             tempNote.setCrypto(true);
             imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
+            Toast.makeText(getApplicationContext(), "lock",
+                    Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(getApplicationContext(), "onDismiss",
-                Toast.LENGTH_SHORT).show();
-
     }
 
     public void setColor(View v) {
