@@ -1,9 +1,9 @@
 /*
  *
- *  Created by Sergey Stepchenkov on 02.10.20 17:10
+ *  Created by Sergey Stepchenkov on 16.10.20 17:37
  *  Copyright (c) 2020. All rights reserved.
  *  More info on www.bootcode.ru
- *  Last modified 02.10.20 17:10
+ *  Last modified 16.10.20 17:23
  *
  */
 
@@ -33,21 +33,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-import ru.bootcode.jotter.daggemodule.AppComponent;
-import ru.bootcode.jotter.daggemodule.AppModule;
-import ru.bootcode.jotter.daggemodule.DaggerAppComponent;
-import ru.bootcode.jotter.daggemodule.DatabaseModule;
 import ru.bootcode.jotter.database.JotterDatabase;
 import ru.bootcode.jotter.database.ListNotesAdapter;
 import ru.bootcode.jotter.database.Note;
@@ -56,22 +52,36 @@ import ru.bootcode.jotter.database.Note;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
+    static final int EDIT_NOTE_REQUEST = 2;               // Код обратки редактора записи Notes
+
+    // Это то что нужно получить от дагера
     @Inject
     JotterDatabase jdb;
-
-    static final int EDIT_NOTE_REQUEST = 2;               // Код обратки редактора записи Notes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        final RecyclerView rvMain = findViewById(R.id.rvMain);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // объявлен как финальный, т.к. необходимло вытаскивать адаптер для получаения текущей
+        // позиции при нажатии и соответсвующего Note, пожно переопределить onItemClick
+        // после чего можно избавиться от этого модификатора
+        // доп. создан RecyclerClickListener
+        final RecyclerView rvMain = findViewById(R.id.rvMain);
         RecyclerView.LayoutManager couponLayoutManager = new LinearLayoutManager(this);
         rvMain.setLayoutManager(couponLayoutManager);
 
-        setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,16 +92,10 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
-
+        // Получаем от дагера необходимые ссылки
         ((App) getApplication()).mAppComponent.inject(this);
 
+        // С помошью RX запросим данные и заполним адаптер
         Disposable d = jdb.notesDao().getAll()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<Note>>() {
@@ -102,7 +106,9 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-        rvMain.addOnItemTouchListener( // and the click is handled
+        // Обработка нажатия, доп. смотри иницилизацию RecycleView
+        // в новое Активити передаем id выбранной записи
+        rvMain.addOnItemTouchListener(
                 new RecyclerClickListener(this, new RecyclerClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         Note nt = ((ListNotesAdapter)rvMain.getAdapter()).getItemNote(position);

@@ -1,9 +1,9 @@
 /*
  *
- *  Created by Sergey Stepchenkov on 02.10.20 17:10
+ *  Created by Sergey Stepchenkov on 16.10.20 17:37
  *  Copyright (c) 2020. All rights reserved.
  *  More info on www.bootcode.ru
- *  Last modified 02.10.20 17:10
+ *  Last modified 16.10.20 17:23
  *
  */
 
@@ -11,8 +11,6 @@ package ru.bootcode.jotter;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.app.DatePickerDialog;
@@ -21,21 +19,20 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
+import com.jaredrummler.android.colorpicker.ColorPickerDialog;
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
+import com.jaredrummler.android.colorpicker.ColorShape;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -43,60 +40,75 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import ru.bootcode.jotter.database.JotterDatabase;
-import ru.bootcode.jotter.database.ListNotesAdapter;
 import ru.bootcode.jotter.database.Note;
 
 import static java.util.Calendar.*;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditNoteActivity extends AppCompatActivity implements ColorPickerDialogListener {
     public final static String INTENT_RESULT = "ru.bootcode.jotter.EditNoteActivity";
 
+    // Это то что нужно получить от дагера
     @Inject
     JotterDatabase jdb;
+
+    // поля в которые мы запишем то что нам передали при создании Активити
     String sID;
     Note tempNote;
 
+    // Вспомогательные переменные
+    Calendar dateAndTime = getInstance();
+
+    // Элементы текущего layout
     ImageButton imgbtnLock;
     EditText teNote;
-    Calendar dateAndTime;
-    Date dateTo = new Date();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
 
-        Intent intent = getIntent();
-        sID  = intent.getStringExtra("id");// Если пусто то новый, иначе это редактирование
+        // Элементы текущего layout
+        teNote = findViewById(R.id.teNote);
+        imgbtnLock= findViewById(R.id.imgbtnLock);
 
+        // Отобразим кнопку назад (по ней же и будем записывать или обновлять данные
         ActionBar actionBar =getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        dateAndTime= getInstance();
 
+        // Получаем от дагера необходимые ссылки
         ((App) getApplication()).mAppComponent.inject(this);
 
-        teNote = findViewById(R.id.teNote);
-        imgbtnLock= findViewById(R.id.imgbtnLock);
-
+        // Получим переданные данные в текушее Активити
+        // если id = пустой строке то значит мы создаем новую запись в БД,
+        // иначе будем обновлять запись по id и нам требуеться запросить
+        // запись из базы данных
+        Intent intent = getIntent();
+        sID  = intent.getStringExtra("id");
+        if (sID == null) {sID = "";}
         if (!sID.isEmpty()) {
             Disposable d = jdb.notesDao().getById(sID)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Consumer<Note>() {
                         @Override
                         public void accept(Note note) throws Exception {
+                            // запишем полученные данные во временную переменную, которую и будем
+                            // править если потребуеться пользователю и ее же и обновим
                             tempNote = note;
+
+                            // Преобразим наши элементы на layout
                             teNote.setText(note.getNote());
-                            dateTo.setTime(note.getTodate().getTime());
                             if (tempNote.isCrypto()) {
                                 imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
                             }
                         }
                     });
         } else {
-            tempNote = new Note("", new Date(), "", 1, 1, false, false, dateTo);
+            // новая запись = новый Note, настроим его по дефолту
+            tempNote = new Note("", new Date(), "", 1, 1, false, false, new Date());
             tempNote.setColor(Color.WHITE);
             setInitialDateTime();
         }
@@ -104,11 +116,16 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Обработка нажатия кнопки назад, по сути запись в базу данных
+        // и возвращение к основной Активити
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (!(tempNote == null)) {
-                    if (!teNote.getText().toString().trim().isEmpty()) {
-                        if (!sID.isEmpty()) {
+                    tempNote.setNote(teNote.getText().toString());
+                    // Проверку на пустую запись не делаем, пользователь мог и пустую
+                    // захотеть создать
+                    //if (!tempNote.getNote().isEmpty()) {
+                        if (sID.isEmpty()) {
                             jdb.notesDao().insert(tempNote);
                         }else{
                             jdb.notesDao().update(tempNote);
@@ -116,7 +133,7 @@ public class EditNoteActivity extends AppCompatActivity {
                         Intent answerIntent = new Intent();
                         answerIntent.putExtra(INTENT_RESULT, tempNote.getId());
                         setResult(RESULT_OK, answerIntent);
-                    }
+                    //}
                 }
                 this.finish();
                 return true;
@@ -125,15 +142,57 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 
-    // установка начальных даты и времени
-    private void setInitialDateTime() {
-        dateTo.setTime(dateAndTime.getTimeInMillis());
-        Toast.makeText(getApplicationContext(),
-                DateUtils.formatDateTime(EditNoteActivity.this,
-                       dateAndTime.getTimeInMillis(),
-                       DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME),
-                Toast.LENGTH_SHORT).show();
+    // Создание типового диалога для выбора цвета, два метода которого были заимплеменчены ниже ----
+    private void createColorPickerDialog() {
+        ColorPickerDialog.newBuilder()
+                .setColor(Color.RED)
+                .setDialogType(ColorPickerDialog.TYPE_PRESETS)
+                .setAllowCustom(true)
+                .setAllowPresets(true)
+                .setColorShape(ColorShape.SQUARE)
+                .setDialogId(0)
+                .show(this);
     }
+
+    @Override
+    public void onColorSelected ( int dialogId, int color){
+        if (dialogId == 0) {
+            tempNote.setColor(color);
+            teNote.setBackgroundColor(color);
+        }
+    }
+
+    @Override
+    public void onDialogDismissed ( int dialogId){
+        Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show();
+    }
+
+    public void setColor(View v) {
+        createColorPickerDialog();
+    }
+    //----------------------------------------------------------------------------------------------
+
+    // установка даты и времени, используется для выбора времени под будильник
+    // поочереди вызываются диалоги выбора даты потом времени --------------------------------------
+    // обработчик выбора даты
+    DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            dateAndTime.set(YEAR, year);
+            dateAndTime.set(MONTH, monthOfYear);
+            dateAndTime.set(DAY_OF_MONTH, dayOfMonth);
+            setTime();
+        }
+    };
+
+    // обработчика выбора времени
+    TimePickerDialog.OnTimeSetListener t = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            dateAndTime.set(HOUR, i);
+            dateAndTime.set(MINUTE, i1);
+            setInitialDateTime();
+        }
+    };
 
     // отображаем диалоговое окно для выбора даты
     public void setDate(View v) {
@@ -144,7 +203,7 @@ public class EditNoteActivity extends AppCompatActivity {
                 .show();
     }
 
-    // отображаем диалоговое окно для выбора даты
+    // отображаем диалоговое окно для выбора времени
     public void setTime() {
         new TimePickerDialog(this, t,
                 dateAndTime.get(HOUR),
@@ -152,98 +211,58 @@ public class EditNoteActivity extends AppCompatActivity {
                 true)
                 .show();
     }
-
-    // установка обработчика выбора даты
-    DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            dateAndTime.set(YEAR, year);
-            dateAndTime.set(MONTH, monthOfYear);
-            dateAndTime.set(DAY_OF_MONTH, dayOfMonth);
-            //setInitialDateTime();
-            setTime();
-        }
-    };
-
-    // установка обработчика выбора даты
-    TimePickerDialog.OnTimeSetListener t = new TimePickerDialog.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(TimePicker timePicker, int i, int i1) {
-            dateAndTime.set(HOUR, i);
-            dateAndTime.set(MINUTE, i1);
-            setInitialDateTime();
-        }
-    };
-
-    public void setPassword(View v) {
-        if (tempNote.isCrypto()) {
-            tempNote.setCrypto(false);
-            imgbtnLock.setImageResource(R.drawable.ic_act_lock);
-            Toast.makeText(getApplicationContext(), "unlock",
-                    Toast.LENGTH_SHORT).show();
-        } else {
-            tempNote.setCrypto(true);
-            imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
-            Toast.makeText(getApplicationContext(), "lock",
-                    Toast.LENGTH_SHORT).show();
-        }
+    // И в итоге инициализируем время которое выбрал пользователь
+    private void setInitialDateTime() {
+        Date dateTo = new Date();
+        dateTo.setTime(dateAndTime.getTimeInMillis());
+        tempNote.setTodate(dateTo);
+        Toast.makeText(getApplicationContext(),
+                DateUtils.formatDateTime(EditNoteActivity.this,
+                       dateAndTime.getTimeInMillis(),
+                       DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME),
+                Toast.LENGTH_SHORT).show();
     }
+    //----------------------------------------------------------------------------------------------
 
-    public void setColor(View v) {
-        showPopupMenuColor(v);
-    }
-
+    // попап меню для остальных действий с записью -------------------------------------------------
     public void openPopupMenu(View v) {
-
+        showPopupMenu(v);
     }
 
-    private void showPopupMenuColor(View v) {
+    private void showPopupMenu(View v) {
         PopupMenu popupMenu = new PopupMenu(this, v);
-        popupMenu.inflate(R.menu.color_select_menu);
-
-        popupMenu
-                .setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        popupMenu.inflate(R.menu.edit_note_menu);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
-                            case R.id.menuYellow:
-                                tempNote.setColor(Color.parseColor("#FFF5C3"));
+                            case R.id.menuClear:
+                                tempNote = new Note("", new Date(), "", 1, 1, false, false, new Date());
+                                tempNote.setColor(Color.WHITE);
                                 teNote.setBackgroundColor(tempNote.getColor());
-
+                                teNote.setText("");
                                 return true;
-                            case R.id.menuGreen:
-                                tempNote.setColor(Color.parseColor("#C9FFC9"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
-                                return true;
-                            case R.id.menuBlue:
-                                tempNote.setColor(Color.parseColor("#C8FFFF"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
-                                return true;
-                            case R.id.menuGray:
-                                tempNote.setColor(Color.parseColor("#DFDFDF"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
-                                return true;
-                            case R.id.menuOrange:
-                                tempNote.setColor(Color.parseColor("#FFE1B5"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
-                                return true;
-                            case R.id.menuWhite:
-                                tempNote.setColor(Color.parseColor("#FFFFFF"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
-                                return true;
-                            case R.id.menuSelect:
-                                tempNote.setColor(Color.parseColor("#FFFFFF"));
-                                teNote.setBackgroundColor(tempNote.getColor());
-
+                            case R.id.menuSave:
+                                if (!(tempNote == null)) {
+                                    tempNote.setNote(teNote.getText().toString());
+                                    tempNote.setDate(dateAndTime.getTime());
+                                    // Проверку на пустую запись не делаем, пользователь мог и пустую
+                                    // захотеть создать
+                                    //if (!tempNote.getNote().isEmpty()) {
+                                    if (sID.isEmpty()) {
+                                        jdb.notesDao().insert(tempNote);
+                                    }else{
+                                        jdb.notesDao().update(tempNote);
+                                    }
+                                    Intent answerIntent = new Intent();
+                                    answerIntent.putExtra(INTENT_RESULT, tempNote.getId());
+                                    setResult(RESULT_OK, answerIntent);
+                                    //}
+                                }
                                 return true;
                             default:
                                 return false;
                         }
-
                     }
                 });
 
@@ -255,5 +274,21 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         });
         popupMenu.show();
+    }
+    //----------------------------------------------------------------------------------------------
+
+    public void setPassword(View v) {
+        // отмечаем или снимаем отметку что запись приватная
+        if (tempNote.isCrypto()) {
+            tempNote.setCrypto(false);
+            imgbtnLock.setImageResource(R.drawable.ic_act_lock);
+            Toast.makeText(getApplicationContext(), "unlock",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            tempNote.setCrypto(true);
+            imgbtnLock.setImageResource(R.drawable.ic_act_unlock);
+            Toast.makeText(getApplicationContext(), "lock",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }

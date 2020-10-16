@@ -21,6 +21,10 @@ import ru.bootcode.jotter.database.JotterDatabase;
 public class DatabaseModule {
     private JotterDatabase jotterDatabase;
 
+    // Создаем БД, прописывает тут же миграции (обновления базы данных)
+    // Для каждого обновления БД свое имя MIGRATION_1_2, MIGRATION_2_3
+    // Порядок обновления прописан в основном классе JotterDatabase
+    // Более подробно как действуют правила можно увидеть там же
     public DatabaseModule(Application mApplication) {
         // allowMainThreadQueries - затычка, необходимо переделать на RX
         jotterDatabase = Room.databaseBuilder(mApplication, JotterDatabase.class, "jotter-db")
@@ -28,6 +32,8 @@ public class DatabaseModule {
                 .allowMainThreadQueries().build();
     }
 
+    // Опять же тут все стандартно для дагера, можно смотреть документацию к нему
+    // В модуле БД будет только один провайдер, укажем что JotterDatabase будет единственным
     @Singleton
     @Provides
     JotterDatabase provideJotterDatabase() {

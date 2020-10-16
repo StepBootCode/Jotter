@@ -9,11 +9,8 @@
 
 package ru.bootcode.jotter.daggemodule;
 
-
 import android.app.Application;
-
 import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -25,6 +22,8 @@ public class AppModule {
         mApplication = application;
     }
 
+    // Опять же тут все стандартно для дагера, можно смотреть документацию к нему
+    // В модуле приложения будет только один провайдер, укажем что Application будет единственным
     @Provides
     @Singleton
     Application providesApplication() {

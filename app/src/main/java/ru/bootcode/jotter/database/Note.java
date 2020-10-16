@@ -1,9 +1,9 @@
 /*
  *
- *  Created by Sergey Stepchenkov on 05.10.20 14:12
+ *  Created by Sergey Stepchenkov on 16.10.20 13:47
  *  Copyright (c) 2020. All rights reserved.
  *  More info on www.bootcode.ru
- *  Last modified 05.10.20 14:11
+ *  Last modified 16.10.20 13:38
  *
  */
 
@@ -27,35 +27,21 @@ public class Note {
 
     @NonNull
     @PrimaryKey
-    private  String id;                           //уникальный идентификатор записи UUID
-    private  String name;                         //Наименование записи
+    private  String id;                           // Уникальный идентификатор записи UUID
+    private  String name;                         // Наименование записи
     @TypeConverters({DataConverter.class})
-    private  Date date;                           //Датаи время записи
-    private  String note;                         //сама запись
+    private  Date date;                           // Датаи время записи(в БД как long)
+    private  String note;                         // Сама запись
     private  int img_id;                          // Ссылка на картинку или null
     private  int type_id;                         // Ссылка на TYPE
-    private  boolean check;                       //Истина если есть срок
+    private  boolean check;                       // Истина если есть срок
     private  boolean crypto;                      // Истина если шифруется/требуется пароль
     @TypeConverters({DataConverter.class})
-    private  Date todate;                         //срок исполнения
-    private  int   color;                         //срок исполнения
+    private  Date todate;                         // Срок исполнения(в БД как long)
+    private  int   color;                         // Цвет, для визуализации поля Note
 
-
-    @Ignore
-    public Note(String nameIn, Date dateIn, String noteIn, int img_idIn, int type_idIn, boolean checkIn, boolean cryptoIn, Date todateIn) {
-        id      = UUID.randomUUID().toString();
-        name    = nameIn;
-        date    = dateIn;
-        note    = noteIn;
-        img_id  = img_idIn;
-        type_id = type_idIn;
-        check   = checkIn;
-        crypto  = cryptoIn;
-        todate  = todateIn;
-        color = Color.YELLOW;
-    }
-
-    public Note(@NonNull String id, String name, Date date, String note, int img_id, int type_id, boolean check, boolean crypto, Date todate) {
+    public Note(@NonNull String id, String name, Date date, String note,
+                int img_id, int type_id, boolean check, boolean crypto, Date todate) {
         this.id         = id;
         this.name       = name;
         this.date       = date;
@@ -69,6 +55,25 @@ public class Note {
     }
 
 
+    @Ignore
+    public Note(String nameIn, Date dateIn, String noteIn,
+                int img_idIn, int type_idIn, boolean checkIn, boolean cryptoIn, Date todateIn) {
+
+        // Аннотация Ignore позволяет подсказать Room, что не должно использоваться в
+        // в данном случае данный конструктор будет игнорирован, так как у нас есть еще один выше
+        id      = UUID.randomUUID().toString();
+        name    = nameIn;
+        date    = dateIn;
+        note    = noteIn;
+        img_id  = img_idIn;
+        type_id = type_idIn;
+        check   = checkIn;
+        crypto  = cryptoIn;
+        todate  = todateIn;
+        color = Color.YELLOW;
+    }
+
+    // переопределенная функция для возможности сравнения, используем для тестирования
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -79,6 +84,8 @@ public class Note {
         }
         Note tmp = (Note) o;
 
+        // Проверки на содержание сделаны от простейших к более сложным,
+        // а следователь более ресурсным (это не принципиально, мне так удобнее и нагляднее)
         if (this.img_id != tmp.img_id || this.type_id != tmp.type_id ||
                 this.check != tmp.check || this.crypto != tmp.crypto ) {
             return false;
@@ -91,84 +98,46 @@ public class Note {
         return (this.id.equals(tmp.id) && this.name.equals(tmp.name) && this.note.equals(tmp.note));
     }
 
-    public void setId(@NonNull String id) {
-        this.id = id;
-    }
+    // Далее геттеры и Сеттеры-----------------------------------------------------
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setId(@NonNull String id)   { this.id = id; }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+    public void setName(String name)        { this.name = name; }
 
-    public void setNote(String note) {
-        this.note = note;
-    }
+    public void setDate(Date date)          { this.date = date; }
 
-    public void setImg_id(int img_id) {
-        this.img_id = img_id;
-    }
+    public void setNote(String note)        { this.note = note; }
 
-    public void setType_id(int type_id) {
-        this.type_id = type_id;
-    }
+    public void setImg_id(int img_id)       { this.img_id = img_id; }
 
-    public void setCheck(boolean check) {
-        this.check = check;
-    }
+    public void setType_id(int type_id)     { this.type_id = type_id; }
 
-    public void setCrypto(boolean crypto) {
-        this.crypto = crypto;
-    }
+    public void setCheck(boolean check)     { this.check = check; }
 
-    public void setTodate(Date todate) {
-        this.todate = todate;
-    }
-    public String getId() {
-        return id;
-    }
+    public void setCrypto(boolean crypto)   { this.crypto = crypto; }
 
-    public String getName() {
-        return name;
-    }
+    public void setTodate(Date todate)      { this.todate = todate; }
 
-    public Date getDate() {
-        return date;
-    }
+    public String getId()           { return id; }
 
-    public String getNote() {
-        return note;
-    }
+    public String getName()         { return name; }
 
-    public int getImg_id() {
-        return img_id;
-    }
+    public Date getDate()           { return date; }
 
-    public int getType_id() {
-        return type_id;
-    }
+    public String getNote()         { return note; }
 
-    public boolean isCheck() {
-        return check;
-    }
+    public int getImg_id()          { return img_id; }
 
-    public boolean isCrypto() {
-        return crypto;
-    }
+    public int getType_id()         { return type_id; }
 
-    public Date getTodate() {
-        return todate;
-    }
+    public boolean isCheck()        { return check;  }
 
+    public boolean isCrypto()       { return crypto; }
 
-    public int getColor() {
-        return color;
-    }
+    public Date getTodate()         { return todate; }
 
-    public void setColor(int color) {
-        this.color = color;
-    }
+    public int getColor()           { return color; }
 
+    public void setColor(int color) { this.color = color; }
+    //-----------------------------------------------------------------------------
 }

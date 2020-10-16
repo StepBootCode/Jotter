@@ -9,18 +9,17 @@
 
 package ru.bootcode.jotter.database;
 
-import android.provider.SyncStateContract;
-
 import androidx.room.TypeConverter;
-
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DataConverter {
+    // Вспомогательный класс, который используется в классах @Entity Room
+    // нужен для преобразования типов JAVA в типы хранимые в БД
 
-    static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    // Область конвертировани даты и времени-------------------------------------------------
+    static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     @TypeConverter
     public static Date fromTimestamp(Long value) {
@@ -31,5 +30,6 @@ public class DataConverter {
     public static Long dateToTimestamp(Date date) {
         return date == null ? null : date.getTime();
     }
+    //---------------------------------------------------------------------------------------
 
 }

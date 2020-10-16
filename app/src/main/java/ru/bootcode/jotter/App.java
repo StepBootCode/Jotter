@@ -19,6 +19,9 @@ public class App extends Application {
 
     DaggerAppComponent mAppComponent;
 
+    // При создании приложения создаем патерн Фабрика с помощью Dagger
+    // Изначально DaggerAppComponent не существует, он забилдится после первой
+    // компиляции, в остальном все стандартно скармливаем дагеру наши модули
     @Override
     public void onCreate() {
         super.onCreate();

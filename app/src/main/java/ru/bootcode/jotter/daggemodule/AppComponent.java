@@ -16,22 +16,21 @@ import dagger.Component;
 import ru.bootcode.jotter.EditNoteActivity;
 import ru.bootcode.jotter.MainActivity;
 import ru.bootcode.jotter.database.JotterDatabase;
-import ru.bootcode.jotter.database.NotesDao;
 
 @Singleton
 @Component(dependencies = {}, modules = {AppModule.class, DatabaseModule.class})
 public interface AppComponent {
 
+    // Интерфейс который мы скарливем Дагеру
+    // в анотации Components не забываем прописывать наши модули
+
+    // Область в которой прописываются инжекты, т.е.
+    // Активити(классы) куда мы будем транслировать наши задоккереные классы ---
     void inject(MainActivity mainActivity);
     void inject(EditNoteActivity editNoteActivity);
-    //AppComponent inject(MainActivity mainActivity);
-
-    //NotesDao notesDao();
-
-    JotterDatabase jotterDatabase();
-
-    //ProductRepository productRepository();
+    //--------------------------------------------------------------------------
 
     Application application();
-
+    JotterDatabase jotterDatabase();
+    //NotesDao notesDao();
 }
